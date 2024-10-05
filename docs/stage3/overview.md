@@ -1,6 +1,6 @@
-## Stage 3: Advanced Agentic Graph Implementation
+# Stage 3: Advanced Agentic Graph with RAG and Vector Search
 
-This stage builds upon the enhanced implementation from Stage 2, introduces Agentic Graph Architecture, which manages a network of specialized agent nodes. Each node represents a specific function or capability, and the orchestrator coordinates their interactions to process user queries and generate responses.
+This stage enhances the Agentic Graph Architecture from Stage 2 by incorporating Retrieval-Augmented Generation (RAG) and vector search capabilities. These additions significantly improve the chatbot's ability to retrieve and utilize relevant information, resulting in more accurate and contextual responses.
 
 ### System Overview
 

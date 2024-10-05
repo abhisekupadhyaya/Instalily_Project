@@ -1,19 +1,18 @@
-## Stage 2: Enhanced Implementation
+# Stage 2: Agentic Graph Implementation
 
-This stage builds upon the scrappy implementation from Stage 1, introducing more sophisticated technologies and techniques to improve the chatbot's performance and capabilities.
+This stage builds upon the scrappy implementation from Stage 1, introducing an Agentic Graph Architecture that manages a network of specialized agent nodes using bare LLM calls. This approach enhances the chatbot's capabilities and flexibility without introducing advanced technologies like RAG or vector databases yet.
 
 ### System Overview
 
-The system now consists of five main components:
-1. Frontend
-2. Backend
-3. MongoDB Database
-4. Vector Database
-5. RAG (Retrieval-Augmented Generation) System
+The system now consists of four main components:
+1. Frontend (unchanged from Stage 1)
+2. Backend (enhanced with Agentic Graph Architecture)
+3. MongoDB Database (unchanged from Stage 1)
+4. Agentic Graph Orchestrator
 
 ## Frontend
 
-The frontend remain unchanged:
+The frontend remains unchanged from Stage 1:
 
 ### Key Functions:
 
@@ -23,19 +22,17 @@ The frontend remain unchanged:
 
 ## Backend
 
-The backend now incorporates more advanced processing and retrieval mechanisms:
+The backend now incorporates the Agentic Graph Architecture:
 
 ### Key Components:
 
 - **HTML Parser**: Enhanced parser to extract and structure relevant information from the received HTML.
-- **Vector Embeddings Generator**: Convert parsed text into vector embeddings for efficient similarity search.
-- **RAG System**: Implement a Retrieval-Augmented Generation system to enhance response quality.
-- **Agentic Workflow**: Refined workflow that leverages RAG and vector search for more accurate and contextual responses.
+- **Agentic Graph Orchestrator**: Manages the network of specialized agent nodes and coordinates their interactions.
 - **Chat Session Manager**: Handle the creation and tracking of chat sessions using unique chatIDs.
 
 ## MongoDB Database
 
-The database structure remains similar, with some additions:
+The database structure remains similar to Stage 1, with a minor addition:
 
 ### Data Models:
 
@@ -62,86 +59,90 @@ The database structure remains similar, with some additions:
       timestamp: Date
     }
   ],
-  pageUrl: String,
-  contextEmbedding: Vector
+  pageUrl: String
 }
 ```
 
-## Vector Database
+## Agentic Graph Architecture
 
-Implement a vector database (e.g., Pinecone, Milvus, or Faiss) to store and efficiently retrieve vector embeddings of product information and chat contexts.
+The core of this implementation is the Agentic Graph Orchestrator, which manages a network of specialized agent nodes. Each node represents a specific function or capability, and the orchestrator coordinates their interactions using bare LLM calls to process user queries and generate responses.
 
-### Key Functions:
+### Agentic Graph Orchestrator
 
-- **Vector Storage**: Store vector embeddings of parsed HTML content and chat contexts.
-- **Similarity Search**: Perform efficient similarity searches to retrieve relevant information.
+The orchestrator is responsible for:
+- Initializing and managing agent nodes
+- Routing information between nodes
+- Handling the overall workflow of query processing
+- Managing sequential processing of tasks
+- Implementing fallback and error-handling mechanisms
 
-## RAG (Retrieval-Augmented Generation) System
+### Specialized Agent Nodes
 
-Implement a RAG system to enhance the quality and accuracy of the chatbot's responses.
+Each agent node is implemented as a prompt template for the LLM, with specific instructions and context for its role. The main agent nodes are:
 
-### Key Components:
+1. **Query Analyzer**
+   - Parses user input
+   - Determines query intent and type
+   - Extracts key entities and parameters
 
-- **Retriever**: Fetch relevant information from the vector database based on the user's query.
-- **Generator**: Use the retrieved information to generate more accurate and contextual responses.
+2. **Context Retriever**
+   - Searches the parsed HTML content
+   - Retrieves relevant product information and chat history
 
-## Agent Workflow
+3. **Product Specialist**
+   - Handles product-specific queries
+   - Accesses detailed product information and specifications
 
-### Stage 1: Query Analysis and Embedding
+4. **Compatibility Checker**
+   - Verifies part compatibility with specific models
+   - Handles cross-referencing of product and part information
 
-**Agent: Query Analyzer and Embedder**
+5. **Installation Guide Generator**
+   - Creates step-by-step installation instructions
+   - Tailors guides to specific parts and models
 
-- Analyzes the user's query to determine its intent and key components.
-- Generates a vector embedding of the query for similarity search.
-- Identifies the type of request and extracts relevant entities.
-- Determines if the query is within the scope of the chatbot's capabilities.
+6. **Troubleshooter**
+   - Diagnoses common issues
+   - Provides troubleshooting steps
 
-### Stage 2: Context Retrieval
+7. **Response Synthesizer**
+   - Combines information from multiple agents
+   - Ensures coherence and relevance of the final response
 
-**Agent: Context Retriever**
+8. **Quality Assurance Agent**
+   - Checks response accuracy and completeness
+   - Ensures adherence to scope and guidelines
 
-- Performs a similarity search in the vector database using the query embedding.
-- Retrieves relevant product information, specifications, and other contextual data.
-- Fetches previous chat history and its embedding for the current session.
-- Combines retrieved information from various sources (HTML content, vector search results, chat history).
+## Agentic Workflow
 
-### Stage 3: RAG Processing
+1. **Query Reception and Analysis**
+   - The Query Analyzer receives the user input
+   - It determines the query type and extracts key information
+   - The analyzer suggests relevant specialized agents based on the query type
 
-**Agent: RAG Processor**
+2. **Context Retrieval**
+   - The Context Retriever searches the parsed HTML content
+   - It retrieves relevant product information and chat history
+   - The Product Specialist is engaged for detailed product information if needed
 
-- Uses the RAG system to generate a preliminary response based on the retrieved context and user query.
-- Enhances the response with additional relevant information from the product database.
-- Ensures the generated content is coherent and directly addresses the user's query.
+3. **Specialized Processing**
+   - Based on the query type, relevant specialized agents are activated:
+     - Compatibility Checker for compatibility queries
+     - Installation Guide Generator for installation-related questions
+     - Troubleshooter for diagnosing issues
 
-### Stage 4: Information Synthesis
+4. **Response Generation**
+   - The Response Synthesizer combines inputs from all activated agents
+   - It generates a coherent response addressing the user's query
 
-**Agent: Information Synthesizer**
+5. **Quality Assurance**
+   - The Quality Assurance Agent reviews the synthesized response
+   - It checks for accuracy, relevance, and adherence to guidelines
+   - The response is refined if necessary
 
-- Combines the RAG-generated response with any additional context-specific information.
-- Identifies gaps in information that may require additional data or clarification.
-- Prepares a structured summary of available information relevant to the query.
+6. **Response Delivery**
+   - The final, optimized response is sent back to the user via the frontend
 
-### Stage 5: Response Generation
-
-**Agent: Response Generator**
-
-- Refines the RAG-generated response for clarity and conciseness.
-- Ensures the response directly addresses the user's query and incorporates product-specific details.
-- Generates follow-up questions or suggestions if more information is required from the user.
-
-### Stage 6: Quality Assurance
-
-**Agent: QA Checker**
-
-- Reviews the generated response for accuracy, relevance, and completeness.
-- Ensures the response adheres to the chatbot's scope and doesn't provide information outside its domain.
-- Checks for consistency with previous responses in the chat history.
-
-### Stage 7: Response Optimization
-
-**Agent: Response Optimizer**
-
-- Refines the response for clarity and conciseness.
-- Formats the response appropriately for the chat interface.
-- Incorporates any necessary disclaimers or additional information.
-- Updates the chat context embedding in the vector database for future reference.
+7. **State Management**
+   - The orchestrator updates the agentStates field in the chat history document
+   - This allows for maintaining context across multiple turns of conversation
