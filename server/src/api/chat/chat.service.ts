@@ -1,12 +1,11 @@
 import { Injectable } from '@nestjs/common';
+import { AgentsService } from '../../agents/agents.service';
 
 @Injectable()
 export class ChatService {
-  processChatRequest(chatId: string, chatQuery: string) {
-    const message = {
-      role: "assistant",
-      content: `Backend Received: ChatID ${chatId}, Chat Query "${chatQuery}"`
-    };
-    return message;
+  constructor(private agentsService: AgentsService) {}
+
+  async processChatRequest(chatId: string, chatQuery: string) {
+    return this.agentsService.completeChat(chatId, chatQuery);
   }
 }
