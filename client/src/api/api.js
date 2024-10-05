@@ -3,7 +3,7 @@ import config from '../config';
 
 const backend_api = axios.create({
   baseURL: config.API_BASE_URL,
-  timeout: 5000,
+  timeout: 500000,
   headers: {
     'Content-Type': 'application/json',
   }

@@ -2,7 +2,7 @@ version: '3'
 
 services:
   ollama:
-    build: .
+    build: ./llama
     image: ollama/ollama
     container_name: ollama
     volumes:
@@ -22,6 +22,16 @@ services:
       - instalily-net
     volumes:
       - instalily_volumedb:/data/db
+
+  server:
+    build: ./server
+    ports:
+      - "8000:8000"
+    networks:
+      - instalily-net
+    depends_on:
+      - mongodb
+      - ollama
 
 volumes:
   instalily_ollama:
