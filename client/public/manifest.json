@@ -6,8 +6,19 @@
   "side_panel": {
     "default_path": "index.html"
   },
-  "permissions": ["sidePanel", "tabs", "activeTabs", "scripting"],
-  "host_permissions": ["https://*/*", "http://*/*","http://*/*/*"],
+  "permissions": [
+    "sidePanel",
+    "tabs",
+    "activeTab",
+    "scripting"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "host_permissions": [
+    "https://*/*",
+    "http://*/*"
+  ],
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' http://localhost:8000;"
   }

@@ -28,10 +28,32 @@ function ChatWindow() {
       // Set user message
       setMessages(prevMessages => [...prevMessages, { role: "user", content: input }]);
       setInput("");
-
-      // Call API & set assistant message
-      const newMessage = await getAIMessage(input);
-      setMessages(prevMessages => [...prevMessages, newMessage]);
+  
+      // Add a temporary "waiting" message
+      const waitingMessage = { role: "assistant", content: "Waiting for expert response..." };
+      setMessages(prevMessages => [...prevMessages, waitingMessage]);
+  
+      try {
+        // Call API to get AI message
+        const newMessage = await getAIMessage(input);
+  
+        // Replace the waiting message with the actual AI response
+        setMessages(prevMessages => 
+          prevMessages.map(msg => 
+            msg === waitingMessage ? newMessage : msg
+          )
+        );
+      } catch (error) {
+        // Handle error if getAIMessage fails
+        console.error("Error getting AI message:", error);
+        
+        // Replace the waiting message with an error message
+        setMessages(prevMessages => 
+          prevMessages.map(msg => 
+            msg === waitingMessage ? { role: "assistant", content: "Sorry, an error occurred. Please try again." } : msg
+          )
+        );
+      }
     }
   };
 
