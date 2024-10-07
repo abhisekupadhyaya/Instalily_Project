@@ -13,8 +13,9 @@ export class ChatService {
     return this.agentsService.completeChat(chatId, chatQuery);
   }
 
-  async updateWebpage(chatId: string, pageUrl: string, product: string, parsedContent: Record<string, any>) {
+  async updateWebpage(chatId: string, pageUrl: string, product: string, parsedContent: string) {
     await this.webpageHistoryService.create(pageUrl, product, parsedContent);
+    await this.webpageHistoryService.getProcessedProductInfo(pageUrl);
     return this.agentsService.createChat(chatId, pageUrl);
   }
 }

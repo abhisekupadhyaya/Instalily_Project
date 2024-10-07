@@ -9,8 +9,8 @@ export class WebpageHistory extends Document {
   @Prop({ required: true })
   product: string;
 
-  @Prop({ type: Object, required: true })
-  parsedContent: Record<string, any>;
+  @Prop({ required: true })
+  parsedContent: string;
 
   @Prop({ default: Date.now })
   timestamp: Date;

@@ -9,7 +9,7 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
 
   const port = configService.get<string>('PORT') || '8000';
-  const corsOrigin = configService.get<string>('CORS_ORIGIN') || 'http://localhost:3000';
+  const corsOrigin = configService.get<string>('CORS_ORIGIN') || 'chrome-extension://jljpchonkmbgcjlekndegmjmijflfcbh';
 
   app.enableCors({
     origin: corsOrigin,

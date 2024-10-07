@@ -16,7 +16,7 @@ export class ChatController {
   @Post(':chatId/update-webpage')
   async updateWebpage(
     @Param('chatId') chatId: string,
-    @Body() body: { pageUrl: string; product: string; parsedContent: Record<string, any> }
+    @Body() body: { pageUrl: string; product: string; parsedContent: string }
   ) {
     const { pageUrl, product, parsedContent } = body;
     return this.chatService.updateWebpage(chatId, pageUrl, product, parsedContent);
