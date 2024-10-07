@@ -28,3 +28,13 @@ export const getAIMessage = async (userQuery) => {
     throw error;
   }
 };
+
+export const updateWebpage = async (chatId, pageUrl, product, parsedContent) => {
+  try {
+    const response = await backend_api.post(`chat/${chatId}/update-webpage`, { pageUrl, product, parsedContent });
+    return response.data;
+  } catch (error) {
+    console.error('Error in updateWebpage:', error);
+    throw error;
+  }
+};

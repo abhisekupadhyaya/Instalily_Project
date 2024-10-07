@@ -5,6 +5,8 @@ import { AppService } from './app.service';
 import { ApiModule } from './api/api.module';
 import { AgentsModule } from './agents/agents.module';
 import { MongooseModule } from '@nestjs/mongoose';
+import { WebpageHistoryModule } from './webpage-history/webpage-history.module';
+
 
 @Module({
   imports: [
@@ -17,7 +19,8 @@ import { MongooseModule } from '@nestjs/mongoose';
       inject: [ConfigService],
     }),
     ApiModule,
-    AgentsModule
+    AgentsModule,
+    WebpageHistoryModule
   ],
   controllers: [AppController],
   providers: [AppService],

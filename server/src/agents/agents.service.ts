@@ -8,4 +8,8 @@ export class AgentsService {
   completeChat(chatId: string, chatQuery: string) {
     return this.queryService.processQueryRequest(chatId, chatQuery);
   }
+
+  createChat(chatId: string, pageUrl: string) {
+    return this.queryService.createChat(chatId, pageUrl);
+  }
 }

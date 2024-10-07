@@ -12,4 +12,13 @@ export class ChatController {
   ) {
     return this.chatService.processChatRequest(chatId, body.chatQuery);
   }
+
+  @Post(':chatId/update-webpage')
+  async updateWebpage(
+    @Param('chatId') chatId: string,
+    @Body() body: { pageUrl: string; product: string; parsedContent: Record<string, any> }
+  ) {
+    const { pageUrl, product, parsedContent } = body;
+    return this.chatService.updateWebpage(chatId, pageUrl, product, parsedContent);
+  }
 }
