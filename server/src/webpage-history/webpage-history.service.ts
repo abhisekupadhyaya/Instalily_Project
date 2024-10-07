@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { WebpageHistory } from './webpage-history.schema';
-import { ParsedParts } from './parsed-parts.schema';
+import { WebpageHistory, WebpageHistoryDocument } from './webpage-history.schema';
+import { ParsedParts, ParsedPartsDocument } from './parsed-parts.schema';
 import * as cheerio from 'cheerio';
 
 @Injectable()
 export class WebpageHistoryService {
   constructor(
-    @InjectModel(WebpageHistory.name) private webpageHistoryModel: Model<WebpageHistory>,
-    @InjectModel(ParsedParts.name) private parsedPartsModel: Model<ParsedParts>
+    @InjectModel(WebpageHistory.name) private webpageHistoryModel: Model<WebpageHistoryDocument>,
+    @InjectModel(ParsedParts.name) private parsedPartsModel: Model<ParsedPartsDocument>
   ) {}
 
   async create(pageUrl: string, product: string, parsedContent: string): Promise<WebpageHistory> {

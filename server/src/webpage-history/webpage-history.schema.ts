@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
 @Schema()
-export class WebpageHistory extends Document {
+export class WebpageHistory {
   @Prop({ required: true })
   pageUrl: string;
 
@@ -16,6 +16,7 @@ export class WebpageHistory extends Document {
   timestamp: Date;
 }
 
+export type WebpageHistoryDocument = WebpageHistory & Document;
 export const WebpageHistorySchema = SchemaFactory.createForClass(WebpageHistory);
 
 WebpageHistorySchema.index({ pageUrl: 'text' });

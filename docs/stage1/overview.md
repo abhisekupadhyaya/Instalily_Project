@@ -1,114 +1,206 @@
 # Stage 1: Scrappy Start
 
-This document outlines a very scrappy implementation for processing the HTML of the page the chatbot have access to and implements the agentic workflow with bare LLM calls.
+This document outlines the implementation of an Appliance Part Assistant, which processes webpage content and provides an interactive chat interface for users to query about appliance parts.
 
 ### System Overview
 
-The system consists of three main components:
-1. Frontend
-2. Backend
+The system consists of four main components:
+1. Chrome Extension (React Frontend)
+2. Backend Server (ExpressJS; NestJS)
 3. MongoDB Database
+4. LLM (Ollama)
 
-## Frontend
+## Chrome Extension (React Frontend)
 
-### Key Functions:
+### 1. Background Script (`background.js`)
 
-- **HTML Capture**: Implement a function to extract the full HTML content of the current webpage.
-- **Chat Initialization**: Send the captured HTML to the backend and wait for a "ready" signal before allowing the user to start chatting.
-- **Message Handling**: Manage sending user messages and receiving agent responses.
+This core component manages the extension's background processes and communication.
 
-## Backend
+**Key Functions:**
+- Implements a caching mechanism (`tabCache`) for storing and retrying message delivery
+- Sets up the side panel for each tab using `chrome.sidePanel.setOptions`
+- Listens for tab updates and removals, managing the extension's lifecycle
+- Processes messages from content scripts and attempts to forward them to the side panel
+- Retries sending cached messages every 30 seconds using `setInterval`
+
+### 2. Content Script (`contentScript.js`)
+
+Injected into web pages, this script captures and transmits page content.
+
+**Key Functions:**
+- Extracts the full HTML content of the current webpage using `document.documentElement.outerHTML`
+- Sends the captured HTML and URL to the background script via `chrome.runtime.sendMessage`
+
+### 3. Chat Interface (`ChatWindow.js`)
+
+The main user interface component for the extension's chat functionality.
+
+**Key Functions:**
+- Renders the chat UI with message history using React
+- Handles user input and message sending
+- Processes incoming messages from the background script
+- Displays AI responses and webpage information
+- Uses the `marked` library to render messages with Markdown formatting
+- Implements auto-scrolling to the latest message
+
+### 4. API Module (`api.js`)
+
+Manages communication between the extension and the backend server.
+
+**Key Functions:**
+- `sendChatMessage`: Sends user messages to the chat API
+- `getAIMessage`: Retrieves AI responses for user queries
+- `updateWebpage`: Sends captured webpage information to the backend
+- Utilizes Axios for making HTTP requests to the backend
+
+### Communication Flow
+
+1. When a webpage loads, `contentScript.js` captures the HTML and sends it to `background.js`.
+2. `background.js` attempts to forward this information to the side panel (`ChatWindow.js`).
+3. If successful, `ChatWindow.js` processes the HTML update and sends it to the backend via `api.js`.
+4. User messages entered in `ChatWindow.js` are sent to the backend using `api.js`.
+5. AI responses are retrieved from the backend and displayed in the chat interface.
+
+Based on the provided code, here's a revised documentation for the backend server:
+
+## Backend Server (ExpressJS; NestJS)
+
+The backend server is built using NestJS, a progressive Node.js framework. It handles chat interactions, webpage updates, and integrates with an LLM (Ollama) for processing queries.
 
 ### Key Components:
 
-- **HTML Parser**: Implement a parser to extract relevant information from the received HTML.
-- **Agentic Workflow**: Design a workflow that uses bare LLM calls to process user queries based on the parsed HTML data.
-- **Chat Session Manager**: Handle the creation and tracking of chat sessions using unique chatIDs.
+#### Chat Controller
+
+The Chat Controller handles incoming HTTP requests related to chat functionality and webpage updates.
+
+**Endpoints:**
+- `POST /:chatId`: Processes chat requests
+- `POST /:chatId/update-webpage`: Updates webpage information
+
+#### Chat Service
+
+The Chat Service acts as an intermediary, coordinating between the Chat Controller, Agents Service, and Webpage History Service.
+
+**Key Functions:**
+- `processChatRequest`: Handles chat queries by delegating to the Agents Service
+- `updateWebpage`: Manages webpage updates, involving both the Webpage History Service and Agents Service
+
+#### Agents Service
+
+The Agents Service manages the interaction between the application and the LLM (Ollama).
+
+**Key Functions:**
+- `completeChat`: Processes chat queries using the Query Service
+- `createChat`: Initializes or updates chat sessions
+
+#### Query Service
+
+The Query Service handles the creation and retrieval of chat sessions, and processes queries using Ollama.
+
+**Key Functions:**
+- `processQueryRequest`: Processes user queries, integrating parsed webpage content if available
+- `createChat`: Creates or updates chat sessions
+- `getOrCreateQueryDocument`: Retrieves or creates a query document for a given chat ID
+- `getOllamaResponse`: Interacts with the Ollama LLM to get responses
+
+#### Webpage History Service
+
+The Webpage History Service manages the storage, retrieval, and processing of parsed webpage content.
+
+**Key Functions:**
+- `create`: Stores or updates webpage history
+- `findOne`: Retrieves webpage history for a given URL
+- `getProcessedProductInfo`: Processes and stores detailed product information from parsed webpage content
+
+###### Data Models:
+
+- **Query**: Represents a chat session, including messages and associated webpage URL
+- **WebpageHistory**: Stores parsed webpage content and associated metadata
+- **ParsedParts**: Stores processed product information extracted from webpage content
+
+##### Key Features:
+
+- **Chat Session Management**: The system maintains chat sessions, allowing for contextual conversations.
+- **Webpage Content Integration**: Parsed webpage content is integrated into chat queries for more informed responses.
+- **Product Information Extraction**: The system extracts and processes detailed product information from webpages, including symptoms, compatibility, and related parts.
+- **LLM Integration**: Ollama is used for generating responses to user queries.
+
+##### API Structure:
+
+The API is structured under the `/api/chat` path, handling chat-related operations and webpage updates.
+
+This backend architecture provides a robust foundation for managing chat interactions, integrating webpage content, and leveraging LLM capabilities for enhanced user experiences.
 
 ## MongoDB Database
 
 The database stores two main types of data:
 
-1. Parsed HTML content
-2. Chat histories
+1. Webpage history (including parsed content)
+2. Chat histories (queries)
 
 ### Data Models:
 
-**Parsed HTML Content**:
-```
+**Webpage History**:
+```typescript
 {
-  _id: ObjectId,
-  pageUrl: String,
-  product: String,
-  parsedContent: Object,
-  timestamp: Date
+  pageUrl: string;
+  product: string;
+  parsedContent: string;
+  timestamp: Date;
 }
 ```
 
-**Chat History**:
-```
+**Parsed Parts**:
+```typescript
 {
-  _id: ObjectId,
-  chatID: String,
+  pageUrl: string;
+  title: string;
+  partSelectNumber: string;
+  manufacturerPartNumber: string;
+  manufacturer: string;
+  forBrands: string;
+  description: string;
+  symptoms: string[];
+  worksWithProducts: string;
+  worksWithInfo: Array<{ brand: string; modelNumber: string; description: string }>;
+  replacedParts: string;
+}
+```
+
+**Query (Chat History)**:
+```typescript
+{
+  chatID: string;
   messages: [
     {
-      role: String,
-      content: String,
-      timestamp: Date
+      role: string;
+      content: string;
+      timestamp: Date;
     }
-  ],
-  pageUrl: String
+  ];
+  pageUrl: string;
 }
 ```
 
-## Agent Workflow
+## LLM (Ollama)
 
-### Stage 1: Query Analysis
+The system uses Ollama with the `llama3.2:3b` model for generating responses to user queries.
 
-**Agent: Query Analyzer**
+## Workflow
 
-- Analyzes the user's query to determine its intent and key components
-- Identifies the type of request (e.g., product information, installation help, compatibility check)
-- Extracts relevant entities (e.g., part numbers, model numbers, product types)
-- Determines if the query is within the scope of the chatbot's capabilities
+1. **HTML Capture and Processing**:
+   - The content script captures the webpage HTML and sends it to the background script.
+   - The background script forwards the HTML to the side panel (ChatWindow).
+   - ChatWindow sends the HTML to the backend for processing and storage.
 
-### Stage 2: Context Retrieval
+2. **Query Processing**:
+   - User queries are sent to the backend via the ChatWindow.
+   - The QueryService retrieves the relevant parsed webpage content.
+   - The query, along with the parsed content, is sent to Ollama for processing.
 
-**Agent: Context Retriever**
+3. **Response Generation**:
+   - Ollama generates a response based on the query and parsed content.
+   - The response is stored in the database and sent back to the frontend.
 
-- Accesses the parsed HTML content from the database based on the current page URL
-- Retrieves relevant product information, specifications, and other contextual data
-- If necessary, fetches previous chat history for the current session
-
-### Stage 3: Information Synthesis
-
-**Agent: Information Synthesizer**
-
-- Combines the query analysis results with the retrieved context
-- Identifies gaps in information that may require additional data or clarification
-- Prepares a structured summary of available information relevant to the query
-
-### Stage 4: Response Generation
-
-**Agent: Response Generator**
-
-- Formulates a clear and concise response based on the synthesized information
-- Ensures the response directly addresses the user's query
-- Incorporates product-specific details, installation instructions, or compatibility information as needed
-- Generates follow-up questions or suggestions if more information is required from the user
-
-### Stage 5: Quality Assurance
-
-**Agent: QA Checker**
-
-- Reviews the generated response for accuracy, relevance, and completeness
-- Ensures the response adheres to the chatbot's scope and doesn't provide information outside its domain
-- Checks for consistency with previous responses in the chat history
-
-### Stage 6: Response Optimization
-
-**Agent: Response Optimizer**
-
-- Refines the response for clarity and conciseness
-- Formats the response appropriately for the chat interface
-- Incorporates any necessary disclaimers or additional information
+4. **Display and Interaction**:
+   - The ChatWindow displays the response to the user and allows for further interaction.

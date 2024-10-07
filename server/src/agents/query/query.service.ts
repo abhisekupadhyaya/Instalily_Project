@@ -3,12 +3,16 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Ollama } from 'ollama';
 import { Query, QueryDocument } from './query.schema';
+import { ParsedParts, ParsedPartsDocument } from '../../webpage-history/parsed-parts.schema'
 
 @Injectable()
 export class QueryService {
   private ollama: Ollama;
 
-  constructor(@InjectModel(Query.name) private queryModel: Model<QueryDocument>) {
+  constructor(
+    @InjectModel(Query.name) private queryModel: Model<QueryDocument>,
+    @InjectModel(ParsedParts.name) private parsedPartsModel: Model<ParsedPartsDocument>
+  ) {
     this.ollama = new Ollama();
   }
 
@@ -17,7 +21,16 @@ export class QueryService {
       const queryDocument = await this.getOrCreateQueryDocument(chatId);
       
       queryDocument.messages.push({ role: 'user', content: chatQuery, timestamp: new Date() });
-      
+
+      if (queryDocument.pageUrl) {
+        const parsedPart = await this.parsedPartsModel.findOne({ pageUrl: queryDocument.pageUrl }).exec();
+        console.log(parsedPart);
+        if (parsedPart) {
+          const parsedPartString = JSON.stringify(parsedPart);
+          chatQuery = `${parsedPartString}\n${chatQuery}`;
+        }
+      }
+
       const ollamaResponse = await this.getOllamaResponse(chatQuery);
       
       queryDocument.messages.push({

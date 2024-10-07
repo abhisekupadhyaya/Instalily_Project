@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
 @Schema()
-export class ParsedParts extends Document {
+export class ParsedParts {
   @Prop({ required: true, index: true })
   pageUrl: string;
 
@@ -37,4 +37,5 @@ export class ParsedParts extends Document {
   replacedParts: string;
 }
 
+export type ParsedPartsDocument = ParsedParts & Document;
 export const ParsedPartsSchema = SchemaFactory.createForClass(ParsedParts);
