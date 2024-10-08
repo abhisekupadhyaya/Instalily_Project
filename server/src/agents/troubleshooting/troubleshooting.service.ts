@@ -13,7 +13,9 @@ export class TroubleshootingService {
     ) {}
 
     async processTroubleshootingRequest(userQuery: string, pageUrl?: string) {
+        console.log("Started TS \n");
         const formattedPrompt = await this.formatPrompt(userQuery, pageUrl);
+        console.log(formattedPrompt);
         return await this.intelligenceService.completeChat(formattedPrompt);
     }
 

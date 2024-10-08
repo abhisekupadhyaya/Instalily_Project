@@ -7,7 +7,7 @@ export class IntelligenceService {
 
   constructor() {
     this.ollama = new Ollama({
-        host: 'http://localhost:11434', // Specify the Ollama server URL
+        host: 'http://localhost:11434',
       });
   }
 
