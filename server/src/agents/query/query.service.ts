@@ -1,20 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Ollama } from 'ollama';
 import { Query, QueryDocument } from './query.schema';
-import { ParsedParts, ParsedPartsDocument } from '../../webpage-history/parsed-parts.schema'
+import { ParsedParts, ParsedPartsDocument } from '../../webpage-history/parsed-parts.schema';
+import { IntelligenceService } from '../../intelligence/intelligence.service';
 
 @Injectable()
 export class QueryService {
-  private ollama: Ollama;
-
   constructor(
     @InjectModel(Query.name) private queryModel: Model<QueryDocument>,
-    @InjectModel(ParsedParts.name) private parsedPartsModel: Model<ParsedPartsDocument>
-  ) {
-    this.ollama = new Ollama();
-  }
+    @InjectModel(ParsedParts.name) private parsedPartsModel: Model<ParsedPartsDocument>,
+    private intelligenceService: IntelligenceService
+  ) {}
 
   async processQueryRequest(chatId: string, chatQuery: string) {
     try {
@@ -31,7 +28,7 @@ export class QueryService {
         }
       }
 
-      const ollamaResponse = await this.getOllamaResponse(chatQuery);
+      const ollamaResponse = await this.intelligenceService.completeChat(chatQuery);
       
       queryDocument.messages.push({
         role: 'assistant',
@@ -72,10 +69,4 @@ export class QueryService {
     return queryDocument;
   }
 
-  private async getOllamaResponse(chatQuery: string) {
-    return this.ollama.chat({
-      model: 'llama3.2:3b',
-      messages: [{ role: 'user', content: chatQuery }],
-    });
-  }
 }

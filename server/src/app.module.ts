@@ -6,6 +6,7 @@ import { ApiModule } from './api/api.module';
 import { AgentsModule } from './agents/agents.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { WebpageHistoryModule } from './webpage-history/webpage-history.module';
+import { IntelligenceModule } from './intelligence/intelligence.module';
 
 
 @Module({
@@ -20,7 +21,8 @@ import { WebpageHistoryModule } from './webpage-history/webpage-history.module';
     }),
     ApiModule,
     AgentsModule,
-    WebpageHistoryModule
+    WebpageHistoryModule,
+    IntelligenceModule
   ],
   controllers: [AppController],
   providers: [AppService],
