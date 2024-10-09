@@ -2,8 +2,7 @@ version: '3'
 
 services:
   ollama:
-    build: ./llama
-    image: ollama/ollama
+    image: ollama/ollama:latest
     container_name: ollama
     volumes:
       - instalily_ollama:/root/.ollama
@@ -12,6 +11,12 @@ services:
     command: ["serve"]
     networks:
       - instalily-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
 
   mongodb:
     image: mongo:7.0
@@ -24,14 +29,12 @@ services:
       - instalily_volumedb:/data/db
 
   server:
-    build: ./server
+    image: server
+    container_name: server
     ports:
       - "8000:8000"
     networks:
       - instalily-net
-    depends_on:
-      - mongodb
-      - ollama
 
 volumes:
   instalily_ollama:

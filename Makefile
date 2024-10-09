@@ -1,23 +1,17 @@
-.PHONY: build up down logs clean
-
 build:
-	docker compose build
+	cd llama && $(MAKE) build
+	cd mongodb && $(MAKE) build
+	cd server && $(MAKE) build
+	cd client && $(MAKE) build
 
-up:
+run:
 	docker compose up -d
-
-pull-model:
-	docker exec ollama ollama pull llama3.2:3b
-
-down:
-	docker compose down
-
-logs:
+	docker compose exec -T ollama ollama pull llama3.2:3b
+	@echo "Model pulled successfully. Attaching to logs..."
 	docker compose logs -f
 
 clean:
 	docker compose down -v
-	docker volume rm instalily_ollama instalily_volumedb
 	docker builder prune -af
 
-all: build up pull-model
+all: build run
