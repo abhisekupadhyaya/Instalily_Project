@@ -2,6 +2,52 @@
 
 This document outlines the implementation of an Appliance Part Assistant, which processes webpage content and provides an interactive chat interface for users to query about appliance parts.
 
+```mermaid
+graph TD
+    subgraph User Interaction
+        A[User] -->|Visits Webpage| CS[ContentScript]
+        A -->|Sends Message| CW[ChatWindow]
+        CW -->|Displays Response| A
+    end
+
+    subgraph Browser Extension
+        CS -->|Sends HTML| BS[BackgroundScript]
+        BS -->|Forwards HTML| CW
+    end
+
+    subgraph Server Architecture
+        CW -->|Forwards HTML/Message| B[API Module]
+        B -->|Store/Retrieve Webpage| C[Webpage History Module]
+        B -->|Process Chat| D[Agents Module]
+    end
+
+    subgraph Database
+        F[(MongoDB)] -->|Schema| H[WebpageHistory]
+        F -->|Schema| I[ParsedParts]
+        F -->|Schema| J[Query]
+    end
+
+    subgraph External Services
+        G[Ollama Server]
+    end
+
+    C -->|Query/Update| F
+    D -->|Query/Update| F
+    D -->|API Call| G
+
+    classDef userInteraction fill:#e6f3ff,stroke:#333,stroke-width:2px;
+    classDef extension fill:#fff2cc,stroke:#333,stroke-width:2px;
+    classDef server fill:#f9f,stroke:#333,stroke-width:2px;
+    classDef database fill:#bdf,stroke:#333,stroke-width:2px;
+    classDef external fill:#dfd,stroke:#333,stroke-width:2px;
+
+    class A,CS,CW userInteraction;
+    class BS extension;
+    class B,C,D server;
+    class F,H,I,J database;
+    class G external;
+```
+
 ### System Overview
 
 The system consists of four main components:

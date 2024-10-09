@@ -2,147 +2,131 @@
 
 This stage builds upon the scrappy implementation from Stage 1, introducing an Agentic Graph Architecture that manages a network of specialized agent nodes using bare LLM calls. This approach enhances the chatbot's capabilities and flexibility without introducing advanced technologies like RAG or vector databases yet.
 
-### System Overview
+```mermaid
+graph TD
+    subgraph User Interaction
+        A[User] -->|Visits Webpage| CS[ContentScript]
+        A -->|Sends Message| CW[ChatWindow]
+        CW -->|Displays Response| A
+    end
 
-The system now consists of four main components:
-1. Frontend (unchanged from Stage 1)
-2. Backend (enhanced with Agentic Graph Architecture)
-3. MongoDB Database (unchanged from Stage 1)
-4. Agentic Graph Orchestrator
+    subgraph Browser Extension
+        CS -->|Sends HTML| BS[BackgroundScript]
+        BS -->|Forwards HTML| CW
+    end
 
-## Frontend
+    subgraph Server Architecture
+        CW -->|Forwards HTML/Message| B[API Module]
+        B -->|Store/Retrieve Webpage| C[Webpage History Module]
+        B -->|Process Chat| D[Agents Module]
+        D -->|AI-powered Response| E[Intelligence Module]
+    end
 
-The frontend remains unchanged from Stage 1:
+    subgraph Database
+        F[(MongoDB)] -->|Schema| H[WebpageHistory]
+        F -->|Schema| I[ParsedParts]
+        F -->|Schema| J[Query]
+    end
 
-### Key Functions:
+    subgraph External Services
+        G[Ollama Server]
+    end
 
-- **HTML Capture**: Implement a function to extract the full HTML content of the current webpage.
-- **Chat Initialization**: Send the captured HTML to the backend and wait for a "ready" signal before allowing the user to start chatting.
-- **Message Handling**: Manage sending user messages and receiving agent responses.
+    C -->|Query/Update| F
+    D -->|Query/Update| F
+    E -->|API Call| G
 
-## Backend
+    classDef userInteraction fill:#e6f3ff,stroke:#333,stroke-width:2px;
+    classDef extension fill:#fff2cc,stroke:#333,stroke-width:2px;
+    classDef server fill:#f9f,stroke:#333,stroke-width:2px;
+    classDef database fill:#bdf,stroke:#333,stroke-width:2px;
+    classDef external fill:#dfd,stroke:#333,stroke-width:2px;
 
-The backend now incorporates the Agentic Graph Architecture:
-
-### Key Components:
-
-- **HTML Parser**: Enhanced parser to extract and structure relevant information from the received HTML.
-- **Agentic Graph Orchestrator**: Manages the network of specialized agent nodes and coordinates their interactions.
-- **Chat Session Manager**: Handle the creation and tracking of chat sessions using unique chatIDs.
-
-## MongoDB Database
-
-The database structure remains similar to Stage 1, with a minor addition:
-
-### Data Models:
-
-**Parsed HTML Content**:
-```
-{
-  _id: ObjectId,
-  pageUrl: String,
-  product: String,
-  parsedContent: Object,
-  timestamp: Date
-}
-```
-
-**Chat History**:
-```
-{
-  _id: ObjectId,
-  chatID: String,
-  messages: [
-    {
-      role: String,
-      content: String,
-      timestamp: Date
-    }
-  ],
-  pageUrl: String
-}
+    class A,CS,CW userInteraction;
+    class BS extension;
+    class B,C,D,E server;
+    class F,H,I,J database;
+    class G external;
 ```
 
-## Agentic Graph Architecture
+### [Extension Architecture](./client/overview.md)
 
-The core of this implementation is the Agentic Graph Orchestrator, which manages a network of specialized agent nodes. Each node represents a specific function or capability, and the orchestrator coordinates their interactions using bare LLM calls to process user queries and generate responses.
+#### [Chrome Extension Components](./client/ExtentionComponent.md)
 
-### Agentic Graph Orchestrator
+**Content Script**
+- Fetches HTML content from the active web page
+- Sends the fetched HTML to the background script
 
-The orchestrator is responsible for:
-- Initializing and managing agent nodes
-- Routing information between nodes
-- Handling the overall workflow of query processing
-- Managing sequential processing of tasks
-- Implementing fallback and error-handling mechanisms
+**Background Script**
+- Receives HTML content from the content script
+- Routes the content to the appropriate React side panel
 
-### Specialized Agent Nodes
+**Manifest File**
+- Defines extension permissions and script declarations
+- Specifies side panel configuration
 
-Each agent node is implemented as a prompt template for the LLM, with specific instructions and context for its role. The main agent nodes are:
+#### [React Side Panel](./client/ExtentionComponent.md)
 
-1. **Query Analyzer**
-   - Parses user input
-   - Determines query intent and type
-   - Extracts key entities and parameters
+**API Layer**
+- Manages connections to the backend services
+- Handles data fetching and state management
 
-2. **Context Retriever**
-   - Searches the parsed HTML content
-   - Retrieves relevant product information and chat history
+**Component Layer**
+- Houses the chat application components
+- Renders the user interface for the side panel
 
-3. **Product Specialist**
-   - Handles product-specific queries
-   - Accesses detailed product information and specifications
+### [Backend Architecture](./server/overview.md)
 
-4. **Compatibility Checker**
-   - Verifies part compatibility with specific models
-   - Handles cross-referencing of product and part information
+The backend is composed of four primary modules:
 
-5. **Installation Guide Generator**
-   - Creates step-by-step installation instructions
-   - Tailors guides to specific parts and models
+**[Agent Module](./server/agents/overview.md)**
+- Manages and coordinates AI agents
+- Handles agent-specific logic and tasks
 
-6. **Troubleshooter**
-   - Diagnoses common issues
-   - Provides troubleshooting steps
+**[Webpage Module](./server/webpage/overview.md)**
+- Processes incoming webpage content
+- Implements caching mechanisms for efficient data retrieval
 
-7. **Response Synthesizer**
-   - Combines information from multiple agents
-   - Ensures coherence and relevance of the final response
+**[Intelligence Module](./server/intelligence/overview.md)**
+- Provides interfaces to LLM and other AI models
+- Handles natural language processing tasks
 
-8. **Quality Assurance Agent**
-   - Checks response accuracy and completeness
-   - Ensures adherence to scope and guidelines
+**[API Module](./server/api/overview.md)**
+- Exposes endpoints for frontend communication
+- Manages authentication and request routing
 
-## Agentic Workflow
+### Data Flow
 
-1. **Query Reception and Analysis**
-   - The Query Analyzer receives the user input
-   - It determines the query type and extracts key information
-   - The analyzer suggests relevant specialized agents based on the query type
+1. User navigates to a webpage
+2. Content script extracts HTML
+3. HTML is sent to background script
+4. Background script routes content to React side panel
+5. React app processes the content through its API layer and sends it to the backend
+6. Requests are sent to the backend API module
+7. Backend processes requests, utilizing various modules as needed
+8. Results are returned to the React app for display
 
-2. **Context Retrieval**
-   - The Context Retriever searches the parsed HTML content
-   - It retrieves relevant product information and chat history
-   - The Product Specialist is engaged for detailed product information if needed
+### Key Technologies
 
-3. **Specialized Processing**
-   - Based on the query type, relevant specialized agents are activated:
-     - Compatibility Checker for compatibility queries
-     - Installation Guide Generator for installation-related questions
-     - Troubleshooter for diagnosing issues
+- **Frontend**: React, Chrome Extension APIs
+- **Backend**: Nest.js with Express.js
+- **AI/ML**: The system uses Ollama with the `llama3.2:3b` model for generating responses to user queries.
 
-4. **Response Generation**
-   - The Response Synthesizer combines inputs from all activated agents
-   - It generates a coherent response addressing the user's query
+### Security Considerations
 
-5. **Quality Assurance**
-   - The Quality Assurance Agent reviews the synthesized response
-   - It checks for accuracy, relevance, and adherence to guidelines
-   - The response is refined if necessary
+- Implement secure communication between extension components using Chrome's message passing system
+- Ensure proper data sanitization for webpage content using DOMPurify
+- Use HTTPS for all API communications
+- Implement user authentication and authorization in the backend using JSON Web Tokens (JWT)
 
-6. **Response Delivery**
-   - The final, optimized response is sent back to the user via the frontend
+### Performance Optimization
 
-7. **State Management**
-   - The orchestrator updates the agentStates field in the chat history document
-   - This allows for maintaining context across multiple turns of conversation
+- Optimize content script for minimal impact on page load times using asynchronous operations
+- Implement efficient caching strategies in the Webpage Module
+- Use lazy loading for React components when possible, leveraging React.lazy() and Suspense
+
+### Future Enhancements
+
+- Implement real-time updates for chat functionality using WebSockets
+- Expand AI capabilities through additional models in the Intelligence Module, such as BERT for named entity recognition
+- Develop a user settings interface for customization options, including theme preferences and AI model selection
