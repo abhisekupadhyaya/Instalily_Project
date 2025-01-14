@@ -1,6 +1,6 @@
-# Instalily AI Assistant
+# Parser AI Assistant
 
-Instalily AI Assistant is a Chrome extension that provides an intelligent chatbot interface for product inquiries, troubleshooting, and customer support on e-commerce websites. The project is currently in Stage 2 of development, implementing an Agentic Graph architecture.
+Parser AI Assistant is a Chrome extension that provides an intelligent chatbot interface for product inquiries, troubleshooting, and customer support on e-commerce websites. The project is currently in Stage 2 of development, implementing an Agentic Graph architecture.
 
 ## Architecture
 
